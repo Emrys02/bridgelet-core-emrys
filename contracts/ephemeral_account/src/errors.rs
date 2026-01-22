@@ -18,4 +18,6 @@ pub enum Error {
     InvalidStatus = 12,
     DuplicateAsset = 13,
     TooManyPayments = 14,
+    DuplicateAsset = 13,
+    TooManyPayments = 14,
 }
