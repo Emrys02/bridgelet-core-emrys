@@ -4,7 +4,7 @@ use soroban_sdk::{Address, BytesN, Env};
 
 /// Construct the message to be signed for sweep authorization
 ///
-/// Message format: hash(destination + nonce + contract_id + timestamp)
+/// Message format: hash(destination + nonce + contract_id)
 ///
 /// # Arguments
 /// * `env` - Soroban environment
@@ -21,14 +21,10 @@ fn construct_sweep_message(
     // Get current nonce
     let nonce = storage::get_sweep_nonce(env);
 
-    // Get current timestamp (in seconds)
-    let timestamp = env.ledger().timestamp();
-
     // Construct the message by concatenating:
     // - destination (serialized as bytes)
     // - nonce (as u64, 8 bytes)
     // - contract_id (serialized as bytes)
-    // - timestamp (as u64, 8 bytes)
     let mut message = soroban_sdk::Vec::new(env);
 
     // Add destination address bytes
@@ -52,16 +48,6 @@ fn construct_sweep_message(
     for byte in contract_bytes.iter() {
         message.push_back(byte);
     }
-
-    // Add timestamp bytes (big-endian u64)
-    message.push_back(((timestamp >> 56) & 0xFF) as u8);
-    message.push_back(((timestamp >> 48) & 0xFF) as u8);
-    message.push_back(((timestamp >> 40) & 0xFF) as u8);
-    message.push_back(((timestamp >> 32) & 0xFF) as u8);
-    message.push_back(((timestamp >> 24) & 0xFF) as u8);
-    message.push_back(((timestamp >> 16) & 0xFF) as u8);
-    message.push_back(((timestamp >> 8) & 0xFF) as u8);
-    message.push_back((timestamp & 0xFF) as u8);
 
     // Hash the message using SHA256
     env.crypto().sha256(&message)
