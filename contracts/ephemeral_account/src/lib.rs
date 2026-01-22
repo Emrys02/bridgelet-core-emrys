@@ -7,7 +7,7 @@ mod storage;
 use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env};
 
 pub use errors::Error;
-pub use events::{AccountCreated, AccountExpired, PaymentReceived, SweepExecuted};
+pub use events::{AccountCreated, AccountExpired, PaymentReceived, SweepExecutedMulti, MultiPaymentReceived};
 pub use storage::{AccountStatus, DataKey};
 
 #[contract]
