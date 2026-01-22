@@ -1,4 +1,5 @@
-use soroban_sdk::{contracttype, symbol_short, Address, Env};
+use soroban_sdk::{contracttype, symbol_short, Address, Env, Vec};
+use crate::storage::Payment;
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -20,6 +21,20 @@ pub struct SweepExecuted {
     pub destination: Address,
     pub amount: i128,
     pub asset: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SweepExecutedMulti {
+    pub destination: Address,
+    pub payments: Vec<Payment>,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MultiPaymentReceived {
+    pub asset: Address,
+    pub amount: i128,
 }
 
 #[contracttype]
@@ -49,6 +64,19 @@ pub fn emit_sweep_executed(env: &Env, destination: Address, amount: i128, asset:
         asset,
     };
     env.events().publish((symbol_short!("swept"),), event);
+}
+
+pub fn emit_sweep_executed_multi(env: &Env, destination: Address, payments: &Vec<Payment>) {
+    let event = SweepExecutedMulti {
+        destination,
+        payments: payments.clone(),
+    };
+    env.events().publish((symbol_short!("swept_mul"),), event);
+}
+
+pub fn emit_multi_payment_received(env: &Env, asset: Address, amount: i128) {
+    let event = MultiPaymentReceived { asset, amount };
+    env.events().publish((symbol_short!("multi_pay"),), event);
 }
 
 pub fn emit_account_expired(env: &Env, recovery_address: Address, amount_returned: i128) {
