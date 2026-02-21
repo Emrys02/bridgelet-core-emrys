@@ -1,7 +1,13 @@
 #[cfg(test)]
 mod test {
-    use crate::{AccountStatus, EphemeralAccountContract, EphemeralAccountContractClient};
-    use soroban_sdk::{testutils::Address as _, Address, BytesN, Env};
+    use crate::{
+        AccountStatus, EphemeralAccountContract, EphemeralAccountContractClient, ReserveReclaimed,
+    };
+    use soroban_sdk::{
+        symbol_short,
+        testutils::{Address as _, Events},
+        Address, BytesN, Env, TryFromVal, Val,
+    };
 
     #[test]
     fn test_initialize() {
@@ -94,7 +100,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic(expected = "Error(Contract, #13)")] // DuplicateAsset
+    #[should_panic(expected = "Error(Contract, #13)")]
     fn test_duplicate_asset() {
         let env = Env::default();
         env.mock_all_auths();
@@ -108,11 +114,11 @@ mod test {
 
         client.initialize(&creator, &expiry_ledger, &recovery);
         client.record_payment(&100, &asset);
-        client.record_payment(&50, &asset); // Should fail - duplicate asset
+        client.record_payment(&50, &asset);
     }
 
     #[test]
-    #[should_panic(expected = "Error(Contract, #14)")] // TooManyPayments
+    #[should_panic(expected = "Error(Contract, #14)")]
     fn test_too_many_assets() {
         let env = Env::default();
         env.mock_all_auths();
@@ -125,13 +131,11 @@ mod test {
 
         client.initialize(&creator, &expiry_ledger, &recovery);
 
-        // Add 10 payments (should work)
         for i in 0..10 {
             let asset = Address::generate(&env);
             client.record_payment(&(100 + i as i128), &asset);
         }
 
-        // 11th should fail
         let asset = Address::generate(&env);
         client.record_payment(&200, &asset);
     }
@@ -150,7 +154,6 @@ mod test {
 
         client.initialize(&creator, &expiry_ledger, &recovery);
 
-        // Record 3 different assets
         let asset1 = Address::generate(&env);
         let asset2 = Address::generate(&env);
         let asset3 = Address::generate(&env);
@@ -163,7 +166,6 @@ mod test {
         assert_eq!(info.payment_count, 3);
         assert_eq!(info.payments.len(), 3);
 
-        // Sweep all
         let auth_sig = BytesN::from_array(&env, &[0u8; 64]);
         client.sweep(&destination, &auth_sig);
 
@@ -186,13 +188,8 @@ mod test {
         let asset1 = Address::generate(&env);
         let asset2 = Address::generate(&env);
 
-        // First payment should emit PaymentReceived
         client.record_payment(&100, &asset1);
-
-        // Second payment should emit MultiPaymentReceived
         client.record_payment(&200, &asset2);
-
-        // Verify events were published (check env.events())
     }
 
     #[test]
@@ -217,11 +214,22 @@ mod test {
 
         assert_eq!(client.get_status(), AccountStatus::Swept);
 
-        // Find the ReserveReclaimed event and assert its fields
         let events = env.events().all();
-        let reserve_event = events
-            .iter()
-            .find(|(_, topics, _)| topics.get(0) == Some(symbol_short!("reserve").into()));
+
+        let events = env.events().all();
+        soroban_sdk::log!(&env, "total events emitted: {}", events.len());
+
+        let reserve_event =
+            events
+                .iter()
+                .find(|(_, topics, _): &(Address, soroban_sdk::Vec<Val>, Val)| {
+                    if let Some(topic) = topics.get(0) {
+                        if let Ok(sym) = soroban_sdk::Symbol::try_from_val(&env, &topic) {
+                            return sym == symbol_short!("reserve");
+                        }
+                    }
+                    false
+                });
 
         assert!(
             reserve_event.is_some(),
@@ -229,7 +237,8 @@ mod test {
         );
 
         let (_, _, data) = reserve_event.unwrap();
-        let reclaimed: ReserveReclaimed = data.into_val(&env);
+        let reclaimed = ReserveReclaimed::try_from_val(&env, &data)
+            .expect("Failed to decode ReserveReclaimed event data");
         assert_eq!(reclaimed.destination, destination);
         assert_eq!(reclaimed.amount, 1_000_000_000i128);
     }
@@ -248,7 +257,6 @@ mod test {
 
         client.initialize(&creator, &expiry_ledger, &recovery);
 
-        // Record 3 different assets
         let asset1 = Address::generate(&env);
         let asset2 = Address::generate(&env);
         let asset3 = Address::generate(&env);
@@ -261,7 +269,6 @@ mod test {
         assert_eq!(info.payment_count, 3);
         assert_eq!(info.payments.len(), 3);
 
-        // Sweep all - should emit both SweepExecutedMulti and ReserveReclaimed events
         let auth_sig = BytesN::from_array(&env, &[0u8; 64]);
         client.sweep(&destination, &auth_sig);
 
