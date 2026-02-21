@@ -8,7 +8,7 @@ mod test {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -26,7 +26,7 @@ mod test {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -46,7 +46,7 @@ mod test {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -74,7 +74,7 @@ mod test {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -98,7 +98,7 @@ mod test {
     fn test_duplicate_asset() {
         let env = Env::default();
         env.mock_all_auths();
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -116,7 +116,7 @@ mod test {
     fn test_too_many_assets() {
         let env = Env::default();
         env.mock_all_auths();
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -140,7 +140,7 @@ mod test {
     fn test_sweep_multiple_assets() {
         let env = Env::default();
         env.mock_all_auths();
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -174,7 +174,7 @@ mod test {
     fn test_multi_payment_events() {
         let env = Env::default();
         env.mock_all_auths();
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -200,7 +200,7 @@ mod test {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
@@ -226,7 +226,7 @@ mod test {
     fn test_sweep_multiple_assets_with_reserve_event() {
         let env = Env::default();
         env.mock_all_auths();
-        let contract_id = env.register_contract(None, EphemeralAccountContract);
+        let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
 
         let creator = Address::generate(&env);
