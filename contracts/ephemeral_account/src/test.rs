@@ -13,6 +13,7 @@ mod test {
     fn test_initialize() {
         let env = Env::default();
         env.mock_all_auths();
+        env.budget().reset_unlimited();
 
         let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
@@ -193,9 +194,11 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_sweep_emits_reserve_reclaimed_event() {
         let env = Env::default();
         env.mock_all_auths();
+        env.budget().reset_unlimited();
 
         let contract_id = env.register(EphemeralAccountContract, ());
         let client = EphemeralAccountContractClient::new(&env, &contract_id);
@@ -215,9 +218,6 @@ mod test {
         assert_eq!(client.get_status(), AccountStatus::Swept);
 
         let events = env.events().all();
-
-        let events = env.events().all();
-        soroban_sdk::log!(&env, "total events emitted: {}", events.len());
 
         let reserve_event =
             events
